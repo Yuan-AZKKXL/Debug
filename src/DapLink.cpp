@@ -71,9 +71,9 @@ void initDapLink() {
     }
 
     // wait until device mounted
-    // while(!USBDevice.mounted()){
-    //     delay(1);
-    // }
+    while(!USBDevice.mounted()){
+        delay(1);
+    }
     DAP_Setup();
 
     recv_idx = 0;

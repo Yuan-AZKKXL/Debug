@@ -106,7 +106,6 @@ void StateMachine::stateMachineTaskFunc(void* params) {
         // NOTE: 这里使用了阻塞等待，如果队列为空，则一直阻塞
         if (xQueueReceive(machine->m_eventQueue, eventBuffer, portMAX_DELAY) == pdTRUE) {
             Event* event = reinterpret_cast<Event*>(eventBuffer);
-
             // 处理事件
             machine->handleEvent(event);
         }

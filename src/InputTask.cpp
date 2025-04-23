@@ -126,52 +126,25 @@ void InputTask::buttonTaskFunc(void* params)
 {
     InputTask* inputTask = static_cast<InputTask*>(params);
     StateMachine* stateMachine = inputTask->m_stateMachine;
-    // 初始化按键状态
-    BtnState buttonState = BtnRelease;
-    unsigned long pressStartTime = 0;
     // 轮询按钮
-    for (;;){
-        // 读取按钮状态
-        bool currentButtonState = digitalRead(BOOT_BTN) == LOW;
-        switch (buttonState){
-            case BtnRelease:{
-                if (currentButtonState){
-                    // 按键按下，开始消抖
-                    pressStartTime = millis();
-                    buttonState = BtnPress;
-                }
-            }break;
-            case BtnPress:{
-                if (!currentButtonState){
-                    // 按键松开，判断是否为短按
-                    if (millis() - pressStartTime < debounceDelay){
-                        // 消抖时间内松开，忽略
-                        buttonState = BtnRelease;
-                    }
-                    else{
-                        // 短按事件
-                        LOGI("press ");
-                        ButtonEvent event(EVENT_BUTTON_PRESS, BOOT_BTN);
-                        stateMachine->postEvent(&event);
-                        buttonState = BtnRelease;
-                    }
-                }
-                else if (millis() - pressStartTime >= longPressDelay){
-                    LOGI("long press");
-                    ButtonEvent event(EVENT_BUTTON_LONGPRESS, BOOT_BTN);
-                    stateMachine->postEvent(&event);
-                    buttonState = BtnLongPress;
-                }
-            }break;
-            case BtnLongPress:{
-                if (!currentButtonState){
-                    // 长按后松开
-                    buttonState = BtnRelease;
-                }
-            }break;
+    for (;;)
+    {
+        if(m_btnAct == BtnAct::BtnPress)
+        {
+            LOGI("BtnPress");
+            m_btnAct = BtnAct::BtnNone;
+            ButtonEvent event(EVENT_BUTTON_PRESS, BOOT_BTN);
+            stateMachine->postEvent(&event);
+        }
+        else if(m_btnAct == BtnAct::BtnLongPress)
+        {
+            LOGI("BtnLongPress");
+            m_btnAct = BtnAct::BtnNone;
+            ButtonEvent event(EVENT_BUTTON_LONGPRESS, BOOT_BTN);
+            stateMachine->postEvent(&event);
         }
         // 按钮检测延迟
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -202,3 +175,39 @@ void InputTask::touchTaskFunc(void* params) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
+
+void InputTask::btnInterruptHandler()
+{
+    static unsigned long lastInterruptTime = 0;
+    unsigned long interruptTime = millis();
+    static unsigned long pressStartTime = 0;
+
+    // 如果中断触发的时间间隔小于50ms，认为是抖动
+    if (interruptTime - lastInterruptTime > DEBOUNCE_DELAT) {
+        lastInterruptTime = interruptTime;
+        // 读取按钮的实际状态
+        bool btnState = digitalRead(BOOT_BTN);
+
+        if (btnState == LOW) {
+            // 按下按钮,记录按下时间
+            m_isPressed = true;
+            pressStartTime = millis();
+        } else {
+            if (m_isPressed) {
+                unsigned long pressDuration = millis() - pressStartTime;
+                if (pressDuration < 500) {
+                    m_btnAct = BtnAct::BtnPress;
+                } else if (pressDuration >= LONG_PRESS_DELAY) {
+                    m_btnAct = BtnAct::BtnLongPress;
+                } else {
+                    m_btnAct = BtnAct::BtnRelease;
+                }
+                m_isPressed = false;
+            }
+        }
+    }
+}
+
+
+BtnAct InputTask::m_btnAct = BtnAct::BtnNone;
+bool   InputTask::m_isPressed = false;

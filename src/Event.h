@@ -19,7 +19,7 @@ enum EventType {
 };
 
 // 定义按键状态
-enum BtnState {
+enum BtnAct {
     BtnNone,
     BtnRelease,
     BtnPress,

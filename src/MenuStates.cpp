@@ -38,9 +38,10 @@ bool MainMenuState::handleEvent(StateMachine* machine, const Event* event) {
     if (!machine || !event) {
         return false;
     }
-    
+
     switch (event->getType()) {
         case EVENT_WHEEL_CLOCKWISE: {
+            LOGI("EVENT_WHEEL_CLOCKWISE");
             // 滚轮顺时针，选择下一项
             if (m_itemCount > 0) {
                 m_currentSelection = (m_currentSelection + 1) % m_itemCount;
@@ -51,6 +52,7 @@ bool MainMenuState::handleEvent(StateMachine* machine, const Event* event) {
         
         case EVENT_WHEEL_COUNTERCLOCKWISE: {
             // 滚轮逆时针，选择上一项
+            LOGI("EVENT_WHEEL_COUNTERCLOCKWISE");
             if (m_itemCount > 0) {
                 m_currentSelection = (m_currentSelection + m_itemCount - 1) % m_itemCount;
                 return true;
@@ -60,6 +62,7 @@ bool MainMenuState::handleEvent(StateMachine* machine, const Event* event) {
         
         case EVENT_BUTTON_PRESS: {
             // 按钮按下，进入选中的功能
+            LOGI("EVENT_BUTTON_PRESS");
             const ButtonEvent* buttonEvent = static_cast<const ButtonEvent*>(event);
             if (buttonEvent->getButtonId() == 0) { // 假设0是确认按钮
                 if (m_itemCount > 0) {
