@@ -18,13 +18,7 @@ enum EventType {
     // 可扩展更多事件类型
 };
 
-// 定义按键状态
-enum BtnAct {
-    BtnNone,
-    BtnRelease,
-    BtnPress,
-    BtnLongPress
-};
+
 
 // 基本事件类
 class Event {

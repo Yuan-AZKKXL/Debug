@@ -129,17 +129,17 @@ void InputTask::buttonTaskFunc(void* params)
     // 轮询按钮
     for (;;)
     {
-        if(m_btnAct == BtnAct::BtnPress)
+        if(m_btnAct == ButtonAction::ButtonShortPress)
         {
             LOGI("BtnPress");
-            m_btnAct = BtnAct::BtnNone;
+            m_btnAct = ButtonAction::NoneAction;
             ButtonEvent event(EVENT_BUTTON_PRESS, BOOT_BTN);
             stateMachine->postEvent(&event);
         }
-        else if(m_btnAct == BtnAct::BtnLongPress)
+        else if(m_btnAct == ButtonAction::ButtonLongPress)
         {
             LOGI("BtnLongPress");
-            m_btnAct = BtnAct::BtnNone;
+            m_btnAct = ButtonAction::NoneAction;
             ButtonEvent event(EVENT_BUTTON_LONGPRESS, BOOT_BTN);
             stateMachine->postEvent(&event);
         }
@@ -190,24 +190,20 @@ void InputTask::btnInterruptHandler()
 
         if (btnState == LOW) {
             // 按下按钮,记录按下时间
-            m_isPressed = true;
             pressStartTime = millis();
         } else {
-            if (m_isPressed) {
-                unsigned long pressDuration = millis() - pressStartTime;
-                if (pressDuration < 500) {
-                    m_btnAct = BtnAct::BtnPress;
-                } else if (pressDuration >= LONG_PRESS_DELAY) {
-                    m_btnAct = BtnAct::BtnLongPress;
-                } else {
-                    m_btnAct = BtnAct::BtnRelease;
-                }
-                m_isPressed = false;
+            unsigned long pressDuration = millis() - pressStartTime;
+            if (pressDuration < 500) {
+                m_btnAct = ButtonAction::ButtonShortPress;
+            } else if (pressDuration >= LONG_PRESS_DELAY) {
+                m_btnAct = ButtonAction::ButtonLongPress;
+            } else {
+                m_btnAct = ButtonAction::ButtonRelease;
             }
         }
     }
 }
 
 
-BtnAct InputTask::m_btnAct = BtnAct::BtnNone;
-bool   InputTask::m_isPressed = false;
+ButtonAction InputTask::m_btnAct = ButtonAction::NoneAction;
+

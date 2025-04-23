@@ -48,6 +48,7 @@ void setup() {
     initDapLink();
     initLCD();
     pinMode(BOOT_BTN, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(BOOT_BTN), InputTask::btnInterruptHandler, CHANGE);
     //
     // 注册状态
     StateManager* stateManager = StateManager::getInstance();

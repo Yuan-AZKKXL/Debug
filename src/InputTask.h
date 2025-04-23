@@ -4,7 +4,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "StateMachine.h"
-#include <Arduino.h>
+
+// 定义按键状态
+enum ButtonAction {
+    NoneAction,
+    ButtonRelease,
+    ButtonShortPress,
+    ButtonLongPress
+};
 
 
 class InputTask {
@@ -20,8 +27,7 @@ private:
     static void touchTaskFunc(void* params);
 
 public:
-    static bool m_isPressed;
-    static BtnAct m_btnAct;
+    static ButtonAction m_btnAct;
 
 public:
     InputTask();
